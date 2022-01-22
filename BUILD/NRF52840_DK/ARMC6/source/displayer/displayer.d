@@ -1,8 +1,6 @@
-BUILD\NRF52840_DK\ARMC6\source\MyToneLibrary.lib\my_tone.o: \
-  source\MyToneLibrary.lib\my_tone.cpp \
-  BUILD\NRF52840_DK\ARMC6\mbed_config.h \
-  source\MyToneLibrary.lib\my_tone.h mbed-os\mbed.h \
-  mbed-os\platform\mbed_version.h mbed-os\rtos\rtos.h \
+BUILD\NRF52840_DK\ARMC6\source\displayer\displayer.o: \
+  source\displayer\displayer.cpp BUILD\NRF52840_DK\ARMC6\mbed_config.h \
+  mbed-os\mbed.h mbed-os\platform\mbed_version.h mbed-os\rtos\rtos.h \
   mbed-os\rtos\TARGET_CORTEX\mbed_rtos_storage.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\RTX\Include\rtx_os.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\Include\cmsis_os2.h \
@@ -205,4 +203,5 @@ BUILD\NRF52840_DK\ARMC6\source\MyToneLibrary.lib\my_tone.o: \
   mbed-os\platform\mbed_mpu_mgmt.h mbed-os\hal\mpu_api.h \
   mbed-os\platform\ScopedRamExecutionLock.h \
   mbed-os\platform\mbed_stats.h mbed-os\platform\FunctionPointer.h \
-  mbed-os\platform\ScopedLock.h
+  mbed-os\platform\ScopedLock.h source\displayer\displayer.h \
+  LiquidCrystal_I2C\LiquidCrystal_I2C.h LiquidCrystal_I2C\Print\Print.h

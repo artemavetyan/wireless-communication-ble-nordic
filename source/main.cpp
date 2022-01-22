@@ -17,19 +17,24 @@
 #include <cstdint>
 #include <events/mbed_events.h>
 #include <mbed.h>
+#include "LiquidCrystal_I2C.h"
 #include "ble/BLE.h"
+
 #include "LEDService.h"
-#include "MyCustomService.h"
+#include "MyCustomMusicService.h"
+#include "MyCustomLCDService.h"
+
 #include "my_tone.h"
 #include "player.h"
+#include "displayer.h"
 
 #include "pretty_printer.h"
 
-I2C i2c_lcd(PTE0,PTE1); // SDA, SCL
 
 const static char DEVICE_NAME[] = "MyCoolName";
 
 PwmOut buzzer(P1_14);
+LiquidCrystal_I2C lcd(0x27, 16, 2, I2C_SDA0, I2C_SCL0);
 
 int eventId;
 
@@ -45,15 +50,21 @@ public:
         _actuated_led(LED2, 0),
         _led_uuid(LEDService::LED_SERVICE_UUID),
         _led_service(NULL),
-        _my_custom_service_uuid(MyCustomService::MY_CUSTOM_SERVICE_UUID),
-        _my_custom_service(NULL),
+        
+        _my_custom_music_service_uuid(MyCustomMusicService::MY_CUSTOM_MUSIC_SERVICE_UUID),
+        _my_custom_music_service(NULL),
+        
+        _my_custom_lcd_service_uuid(MyCustomLCDService::MY_CUSTOM_LCD_SERVICE_UUID),
+        _my_custom_lcd_service(NULL),
+        
         _player(&buzzer),
+        _displayer(&lcd),
         _adv_data_builder(_adv_buffer) {}
 
     ~LEDDemo() {
         delete _led_service;
-        delete _my_custom_service;
-
+        delete _my_custom_music_service;
+        delete _my_custom_lcd_service;
     }
 
     void start() {
@@ -75,7 +86,8 @@ private:
         }
 
         _led_service = new LEDService(_ble, false);
-        _my_custom_service = new MyCustomService(_ble, false);
+        _my_custom_music_service = new MyCustomMusicService(_ble, false);
+        _my_custom_lcd_service = new MyCustomLCDService(_ble, NULL);
 
         _ble.gattServer().onDataWritten(this, &LEDDemo::on_data_written);
 
@@ -94,7 +106,7 @@ private:
         
 
         _adv_data_builder.setFlags();
-        _adv_data_builder.setLocalServiceList(mbed::make_Span(&_my_custom_service_uuid, 1));
+        _adv_data_builder.setLocalServiceList(mbed::make_Span(&_my_custom_music_service_uuid, 1));
         _adv_data_builder.setName(DEVICE_NAME);
 
         /* Setup advertising */
@@ -139,11 +151,24 @@ private:
             printf("Value received\n");
             _actuated_led = *(params->data);
         }
-        if ((params->handle == _my_custom_service->getValueHandle()) && (params->len == 1)) {
-            printf("Custom service\n");
+        if ((params->handle == _my_custom_music_service->getValueHandle()) && (params->len == 1)) {
+            printf("Custom music service\n");
             printf("%i\n",*(params->data));
             uint8_t songIndex = *(params->data);
             _player.play(songIndex);
+        }
+
+        if ((params->handle == _my_custom_lcd_service->getValueHandle())) {
+            printf("Custom LCD service\n");
+            printf("Data received: length = %d, data = ",params->len);
+            char message[16] = {};
+            for(int x=0; x < params->len; x++) {
+                printf("%c", params->data[x]);
+                message[x] = params->data[x];
+            }
+            printf("\n\r");
+
+            _displayer.display(message);
         }
     }
 
@@ -171,12 +196,15 @@ private:
     DigitalOut _actuated_led;
 
     Player _player;
-
+    Displayer _displayer;
 
     UUID _led_uuid;
-    UUID _my_custom_service_uuid;
+    UUID _my_custom_music_service_uuid;
+    UUID _my_custom_lcd_service_uuid;
+
     LEDService *_led_service;
-    MyCustomService *_my_custom_service;
+    MyCustomMusicService *_my_custom_music_service;
+    MyCustomLCDService *_my_custom_lcd_service;
 
     uint8_t _adv_buffer[ble::LEGACY_ADVERTISING_MAX_SIZE];
     ble::AdvertisingDataBuilder _adv_data_builder;
@@ -189,6 +217,8 @@ void schedule_ble_events(BLE::OnEventsToProcessCallbackContext *context) {
 
 int main()
 {
+    printf("\nHi!\n");
+
     BLE &ble = BLE::Instance();
     ble.onEventsToProcess(schedule_ble_events);
 

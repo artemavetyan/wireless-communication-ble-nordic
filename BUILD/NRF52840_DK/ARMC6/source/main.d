@@ -204,7 +204,8 @@ BUILD\NRF52840_DK\ARMC6\source\main.o: source\main.cpp \
   mbed-os\platform\mbed_mpu_mgmt.h mbed-os\hal\mpu_api.h \
   mbed-os\platform\ScopedRamExecutionLock.h \
   mbed-os\platform\mbed_stats.h mbed-os\platform\FunctionPointer.h \
-  mbed-os\platform\ScopedLock.h mbed-os\features\FEATURE_BLE\ble\BLE.h \
+  mbed-os\platform\ScopedLock.h LiquidCrystal_I2C\LiquidCrystal_I2C.h \
+  LiquidCrystal_I2C\Print\Print.h mbed-os\features\FEATURE_BLE\ble\BLE.h \
   mbed-os\features\FEATURE_BLE\ble\BLERoles.h \
   mbed-os\features\FEATURE_BLE\ble\blecommon.h \
   mbed-os\features\FEATURE_BLE\ble\Gap.h \
@@ -256,5 +257,7 @@ BUILD\NRF52840_DK\ARMC6\source\main.o: source\main.cpp \
   mbed-os\features\FEATURE_BLE\ble\ServiceDiscovery.h \
   mbed-os\features\FEATURE_BLE\ble\CharacteristicDescriptorDiscovery.h \
   mbed-os\features\FEATURE_BLE\ble\FunctionPointerWithContext.h \
-  source\LEDService.h source\MyCustomService.h \
-  source\MyToneLibrary\my_tone.h source\player.h source\pretty_printer.h
+  source\services\LEDService.h source\services\MyCustomMusicService.h \
+  source\services\MyCustomLCDService.h source\MyToneLibrary\my_tone.h \
+  source\player\player.h source\displayer\displayer.h \
+  source\pretty_printer.h

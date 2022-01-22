@@ -1,7 +1,7 @@
 BUILD\NRF52840_DK\ARMC6\source\player\player.o: source\player\player.cpp \
-  BUILD\NRF52840_DK\ARMC6\mbed_config.h source\player\player.h \
-  source\my_tone.h mbed-os\mbed.h mbed-os\platform\mbed_version.h \
-  mbed-os\rtos\rtos.h mbed-os\rtos\TARGET_CORTEX\mbed_rtos_storage.h \
+  BUILD\NRF52840_DK\ARMC6\mbed_config.h mbed-os\mbed.h \
+  mbed-os\platform\mbed_version.h mbed-os\rtos\rtos.h \
+  mbed-os\rtos\TARGET_CORTEX\mbed_rtos_storage.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\RTX\Include\rtx_os.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\Include\cmsis_os2.h \
   mbed-os\rtos\TARGET_CORTEX\mbed_rtx_conf.h \
@@ -203,4 +203,5 @@ BUILD\NRF52840_DK\ARMC6\source\player\player.o: source\player\player.cpp \
   mbed-os\platform\mbed_mpu_mgmt.h mbed-os\hal\mpu_api.h \
   mbed-os\platform\ScopedRamExecutionLock.h \
   mbed-os\platform\mbed_stats.h mbed-os\platform\FunctionPointer.h \
-  mbed-os\platform\ScopedLock.h
+  mbed-os\platform\ScopedLock.h source\player\player.h \
+  source\MyToneLibrary\my_tone.h

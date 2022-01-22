@@ -1,6 +1,8 @@
-BUILD\NRF52840_DK\ARMC6\source\my_tone.o: source\my_tone.cpp \
-  BUILD\NRF52840_DK\ARMC6\mbed_config.h source\my_tone.h mbed-os\mbed.h \
-  mbed-os\platform\mbed_version.h mbed-os\rtos\rtos.h \
+BUILD\NRF52840_DK\ARMC6\LiquidCrystal_I2C\LiquidCrystal_I2C.o: \
+  LiquidCrystal_I2C\LiquidCrystal_I2C.cpp \
+  BUILD\NRF52840_DK\ARMC6\mbed_config.h \
+  LiquidCrystal_I2C\LiquidCrystal_I2C.h LiquidCrystal_I2C\Print\Print.h \
+  mbed-os\mbed.h mbed-os\platform\mbed_version.h mbed-os\rtos\rtos.h \
   mbed-os\rtos\TARGET_CORTEX\mbed_rtos_storage.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\RTX\Include\rtx_os.h \
   mbed-os\rtos\TARGET_CORTEX\rtx5\Include\cmsis_os2.h \
