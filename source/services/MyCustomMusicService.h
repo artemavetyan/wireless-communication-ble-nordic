@@ -1,3 +1,5 @@
+#include "ble/BLE.h"
+
 #ifndef __BLE_MY_CUSTOM_MUSIC_SERVICE_H__
 #define __BLE_MY_CUSTOM_MUSIC_SERVICE_H__
 

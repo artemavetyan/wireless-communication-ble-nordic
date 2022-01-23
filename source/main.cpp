@@ -1,83 +1,78 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2006-2013 ARM Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #include <cstdint>
 #include <events/mbed_events.h>
 #include <mbed.h>
 #include "LiquidCrystal_I2C.h"
 #include "ble/BLE.h"
 
-#include "LEDService.h"
 #include "MyCustomMusicService.h"
 #include "MyCustomLCDService.h"
+#include "MyCustomTemperatureService.h"
 
 #include "my_tone.h"
 #include "player.h"
 #include "displayer.h"
+#include "temperatureReader.h"
 
 #include "pretty_printer.h"
-
 
 const static char DEVICE_NAME[] = "MyCoolName";
 
 PwmOut buzzer(P1_14);
 LiquidCrystal_I2C lcd(0x27, 16, 2, I2C_SDA0, I2C_SCL0);
+AnalogIn therm(A1);
 
-int eventId;
+int blinkEventId;
 
+int temperatureEventId;
 
 static EventQueue event_queue(/* event count */ 10 * EVENTS_EVENT_SIZE);
 
-class LEDDemo : ble::Gap::EventHandler {
+class MyDemo : ble::Gap::EventHandler {
 public:
-    LEDDemo(BLE &ble, events::EventQueue &event_queue) :
+    MyDemo(BLE &ble, events::EventQueue &event_queue) :
         _ble(ble),
         _event_queue(event_queue),
         _alive_led(LED1, 1),
         _actuated_led(LED2, 0),
-        _led_uuid(LEDService::LED_SERVICE_UUID),
-        _led_service(NULL),
         
         _my_custom_music_service_uuid(MyCustomMusicService::MY_CUSTOM_MUSIC_SERVICE_UUID),
         _my_custom_music_service(NULL),
         
         _my_custom_lcd_service_uuid(MyCustomLCDService::MY_CUSTOM_LCD_SERVICE_UUID),
         _my_custom_lcd_service(NULL),
+
+        _my_custom_temperature_service_uuid(MyCustomTemperatureService::MY_CUSTOM_TEMPERATURE_SERVICE_UUID),
+        _my_custom_temperature_service(NULL),
         
         _player(&buzzer),
         _displayer(&lcd),
+        _temperatureReader(&therm),
         _adv_data_builder(_adv_buffer) {}
 
-    ~LEDDemo() {
-        delete _led_service;
+    ~MyDemo() {
         delete _my_custom_music_service;
         delete _my_custom_lcd_service;
+        delete _my_custom_temperature_service;
     }
 
     void start() {
         _ble.gap().setEventHandler(this);
 
-        _ble.init(this, &LEDDemo::on_init_complete);
-
-        // _event_queue.call_every(500, this, &LEDDemo::blink);
+        _ble.init(this, &MyDemo::on_init_complete);
 
         _event_queue.dispatch_forever();
     }
 
 private:
+    /**
+     * Helper that construct an event handler from a member function of this
+     * instance.
+     */
+    template<typename Arg>
+    FunctionPointerWithContext<Arg> as_cb(void (MyDemo::*member)(Arg))
+    {
+        return makeFunctionPointer(this, member);
+    }
     /** Callback triggered when the ble initialization process has finished */
     void on_init_complete(BLE::InitializationCompleteCallbackContext *params) {
         if (params->error != BLE_ERROR_NONE) {
@@ -85,11 +80,17 @@ private:
             return;
         }
 
-        _led_service = new LEDService(_ble, false);
         _my_custom_music_service = new MyCustomMusicService(_ble, false);
         _my_custom_lcd_service = new MyCustomLCDService(_ble, NULL);
+        _my_custom_temperature_service = new MyCustomTemperatureService(_ble, NULL);
 
-        _ble.gattServer().onDataWritten(this, &LEDDemo::on_data_written);
+        _temperatureReader.setTemperatureService(_my_custom_temperature_service);
+        _temperatureReader.setDisplayer(&_displayer);
+
+        _ble.gattServer().onDataWritten(this, &MyDemo::on_data_written);
+        _ble.gattServer().onDataRead(this, &MyDemo::on_data_read);
+        _ble.gattServer().onUpdatesEnabled(as_cb(&MyDemo::on_updates_enabled));
+        // _ble.gattServer().onUpdatesDisabled(this, &MyDemo::on_updates_disabled);
 
         print_mac_address();
 
@@ -142,20 +143,19 @@ private:
     }
 
     /**
-     * This callback allows the LEDService to receive updates to the ledState Characteristic.
+     * This callback allows the services to receive updates to their haracteristics.
      *
      * @param[in] params Information about the characterisitc being updated.
      */ 
     void on_data_written(const GattWriteCallbackParams *params) {
-        if ((params->handle == _led_service->getValueHandle()) && (params->len == 1)) {
-            printf("Value received\n");
-            _actuated_led = *(params->data);
-        }
         if ((params->handle == _my_custom_music_service->getValueHandle()) && (params->len == 1)) {
             printf("Custom music service\n");
             printf("%i\n",*(params->data));
             uint8_t songIndex = *(params->data);
             _player.play(songIndex);
+
+            _temperatureReader.readTemperature();
+
         }
 
         if ((params->handle == _my_custom_lcd_service->getValueHandle())) {
@@ -167,10 +167,31 @@ private:
                 message[x] = params->data[x];
             }
             printf("\n\r");
-
             _displayer.display(message);
         }
     }
+
+    void on_data_read(const GattReadCallbackParams *params){
+        printf("Reading Data\n");
+            printf("data read:\r\n");
+        printf("connection handle: %u\r\n", params->connHandle);
+        printf("attribute handle: %u", params->handle);
+        if (params->handle == _my_custom_temperature_service->getValueHandle()) {
+            printf(" (temperature characteristic)\r\n");
+        } else {
+            printf("\r\n");
+        }
+    }
+
+    void on_updates_enabled(GattAttribute::Handle_t handle){
+        if (handle == _my_custom_temperature_service->getValueHandle()) {
+            printf("update enabled on temperature characteristic\r\n");
+        } 
+    }
+
+    // void on_updates_disabled(const GattDataSentCallbackParams *params){
+    //     printf("update disabled on handle %d\r\n", params->attHandle);
+    // }
 
     void blink() {
         _alive_led = !_alive_led;
@@ -180,12 +201,14 @@ private:
     /* Event handler */
 
     void onConnectionComplete(const ble::ConnectionCompleteEvent&) {
-       eventId = _event_queue.call_every(500, this, &LEDDemo::blink);
+       blinkEventId = _event_queue.call_every(500, this, &MyDemo::blink);
+       temperatureEventId = _event_queue.call_every(1000, &_temperatureReader, &TemperatureReader::readTemperature);
 
     }
 
     void onDisconnectionComplete(const ble::DisconnectionCompleteEvent&) {
-        _event_queue.cancel(eventId);
+        _event_queue.cancel(blinkEventId);
+        _event_queue.cancel(temperatureEventId);
         _ble.gap().startAdvertising(ble::LEGACY_ADVERTISING_HANDLE);
     }
 
@@ -197,14 +220,15 @@ private:
 
     Player _player;
     Displayer _displayer;
+    TemperatureReader _temperatureReader;
 
-    UUID _led_uuid;
     UUID _my_custom_music_service_uuid;
     UUID _my_custom_lcd_service_uuid;
+    UUID _my_custom_temperature_service_uuid;
 
-    LEDService *_led_service;
     MyCustomMusicService *_my_custom_music_service;
     MyCustomLCDService *_my_custom_lcd_service;
+    MyCustomTemperatureService *_my_custom_temperature_service;
 
     uint8_t _adv_buffer[ble::LEGACY_ADVERTISING_MAX_SIZE];
     ble::AdvertisingDataBuilder _adv_data_builder;
@@ -222,7 +246,7 @@ int main()
     BLE &ble = BLE::Instance();
     ble.onEventsToProcess(schedule_ble_events);
 
-    LEDDemo demo(ble, event_queue);
+    MyDemo demo(ble, event_queue);
     demo.start();
 
     return 0;

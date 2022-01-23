@@ -13,7 +13,9 @@
             "target.extra_labels_add": ["CORDIO", "CORDIO_BLUENRG"]
         },
         "NRF52840_DK": {
-            "target.features_add": ["BLE"]
+            "target.features_add": ["BLE"],
+            "target.printf_lib": "std"
+
         },
         "NRF52_DK": {
             "target.features_add": ["BLE"]

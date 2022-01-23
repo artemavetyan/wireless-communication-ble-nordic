@@ -12,6 +12,7 @@ public:
 
     // void display(char* message);
     void display(char message[]);
+    void display(float value);
 
 private:
     LiquidCrystal_I2C* _lcd;

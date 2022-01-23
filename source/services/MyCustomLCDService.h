@@ -1,3 +1,5 @@
+#include "ble/BLE.h"
+
 #ifndef __BLE_MY_CUSTOM_LCD_SERVICE_H__
 #define __BLE_MY_CUSTOM_LCD_SERVICE_H__
 
@@ -22,7 +24,6 @@ public:
 
 private:
     BLEDevice                         &ble;
-    // ReadWriteGattCharacteristic<bool> lcdState;
     ReadWriteArrayGattCharacteristic<char, 16> lcdState;
 
 };
