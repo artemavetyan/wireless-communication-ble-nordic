@@ -1,10 +1,7 @@
-/* Includes ------------------------------------------------------------------*/
 #include "mbed.h"
 #include <cstdint>
 #include <cstdio>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
 #define C3  131 //C octave3
 #define Csharp3 139 //C#
 #define D3  147 //D
@@ -53,13 +50,3 @@
 #define A6  1760 //A
 #define Asharp6 1865 //A#
 #define B6  1976 //B
-
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-// void Tune(PwmOut name, int period, int beat);
-void PlaySong(uint8_t songId, PwmOut buzzer);
-
-// void Auto_tunes(PwmOut name, int period, int beat);
-// void Stop_tunes(PwmOut name);
-        
-/* Private functions ---------------------------------------------------------*/

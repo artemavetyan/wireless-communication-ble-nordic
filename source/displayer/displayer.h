@@ -10,8 +10,7 @@ class Displayer
 public:
     Displayer(LiquidCrystal_I2C* lcd); 
 
-    // void display(char* message);
-    void display(char message[]);
+    void display(char message[], int length);
     void display(float value);
 
 private:

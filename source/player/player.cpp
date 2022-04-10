@@ -397,7 +397,5 @@ void (*songs[2]) (PwmOut* buzzer) = {playHappyBirthday, playWilhelmus};
 Player::Player(PwmOut* buzzer): _buzzer(buzzer) {}
 
 void Player::play(uint8_t songIndex) {
-    
-    printf("%i\n",songIndex);
     songs[songIndex](_buzzer);
 }

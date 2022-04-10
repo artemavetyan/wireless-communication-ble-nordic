@@ -8,9 +8,7 @@ TemperatureReader::TemperatureReader(AnalogIn* therm): _therm(therm) {
 
 void TemperatureReader::readTemperature() {
     float thermValue;
-    printf("%s\n","readTemperature");
     thermValue = _therm->read(); 
-    printf("%f\n" , thermValue);
 
     // convert the value to resistance
     thermValue = 1 / thermValue  - 1;     // (1/ADC - 1) 
@@ -30,8 +28,6 @@ void TemperatureReader::readTemperature() {
     
     uint8_t valueToWrite = (uint8_t)steinhart;
     _my_custom_temperature_service->write(valueToWrite);
-    //TODO: show temperature on LCD>
-    // _displayer->display(steinhart);
 }
 
 void TemperatureReader::setTemperatureService(MyCustomTemperatureService* my_custom_temperature_service) {

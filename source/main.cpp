@@ -161,19 +161,19 @@ private:
         if ((params->handle == _my_custom_lcd_service->getValueHandle())) {
             printf("Custom LCD service\n");
             printf("Data received: length = %d, data = ",params->len);
-            char message[16] = {};
+            char message[32] = {};
             for(int x=0; x < params->len; x++) {
                 printf("%c", params->data[x]);
                 message[x] = params->data[x];
             }
             printf("\n\r");
-            _displayer.display(message);
+            _displayer.display(message, params->len);
         }
     }
 
     void on_data_read(const GattReadCallbackParams *params){
         printf("Reading Data\n");
-            printf("data read:\r\n");
+        printf("data read:\r\n");
         printf("connection handle: %u\r\n", params->connHandle);
         printf("attribute handle: %u", params->handle);
         if (params->handle == _my_custom_temperature_service->getValueHandle()) {
